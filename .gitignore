@@ -1,0 +1,17 @@
+# environment / build
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+
+# model weights (downloaded automatically by ultralytics)
+*.pt
+
+# private data: packet captures, photos/video, mission logs
+captures/*
+!captures/cap.sh
+!captures/iphone_cap.py
+!captures/OFFLINE_STEPS.md
+*.pcap
+*.mp4
+*.h264

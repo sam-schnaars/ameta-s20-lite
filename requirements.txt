@@ -1,0 +1,13 @@
+# Python 3.11
+opencv-python
+av
+ultralytics
+numpy
+pyserial
+openai
+certifi
+pymobiledevice3      # only for captures/iphone_cap.py (needs construct==2.10.69)
+construct==2.10.69
+manifold3d           # only for cad/pin_release.py
+trimesh
+matplotlib
