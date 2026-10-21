@@ -163,3 +163,6 @@ after 4 retries -> fit U.FL 2.4 GHz antennas on both boards before flying.
   Verified end-to-end over ESP-NOW: prepare_for_flight -> safe_release RELEASED -> CLOSE (signal -86 dBm, no antennas).
 - XIAO C3 gotcha: remote reset via RTS from pyserial can drop the board into download mode -> tap R to run again.
   If upload fails ("No serial data received"): hold B, tap R, release B, upload, then tap R.
+- 2026-10-20: ground antenna (long PCB strip, U.FL) on ground XIAO only: signal -84/-94 -> -53..-65 dBm side by side.
+  Bug found+fixed: harness on USB with nobody reading stalled on Serial.printf (HWCDC TX timeout) and missed commands
+  (9/50) -> Serial.setTxTimeoutMs(0). After fix: 47/50 single-try, ~100% with retries.

@@ -130,6 +130,7 @@ void handleRadio() {
 
 void setup() {
   Serial.begin(115200);
+  Serial.setTxTimeoutMs(0);     // never stall on log output when USB is connected but nobody is reading
   prefs.begin("harness", false);
   HOLD_ANGLE = prefs.getInt("hold", HOLD_ANGLE);
   RELEASE_ANGLE = prefs.getInt("release", RELEASE_ANGLE);
