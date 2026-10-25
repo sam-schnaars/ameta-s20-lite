@@ -66,18 +66,26 @@ rear -= box(0, r_out + 1, -(ARM_W / 2 + CLEAR), ARM_W / 2 + CLEAR, seat_z, seat_
 rear -= box(-(BUMP_L / 2 + 0.6), BUMP_L / 2 + 0.6, -(BUMP_W / 2 + 0.6), BUMP_W / 2 + 0.6,
             seat_z - BUMP_H - 0.5, seat_z + 0.1)                                # bump recess
 for s in (-1, 1):                                                               # strap ears (velcro / zip tie)
-    ear = box(-4, 4, min(s * (r_out - 1), s * (r_out + 5)), max(s * (r_out - 1), s * (r_out + 5)), seat_z - 2, seat_z + 1)
+    top = box(-4, 4, min(s * (r_out - 1), s * (r_out + 5)), max(s * (r_out - 1), s * (r_out + 5)), seat_z - 2, seat_z + 1)
+    zl = cup_bot - 6.0                            # anchor point ON the cone under the cup (no floating start)
+    rl = r_out - (cup_bot - zl) - 1.0
+    low = box(-3, 3, min(s * (rl - 0.5), s * rl), max(s * (rl - 0.5), s * rl), zl, zl + 0.1)
+    ear = (top + low).hull()                      # 45-ish brace under the ear: prints without supports
     slot = box(-3, 3, min(s * (r_out + 1), s * (r_out + 3.5)), max(s * (r_out + 1), s * (r_out + 3.5)),
                seat_z - 3, seat_z + 2)
     rear = rear + ear - slot
-rear += cyl(cup_bot + 0.01, 5.0, 6.5)                                           # leg (tapers up)
+cone_h = r_out - 6.5                                                            # 45 deg cone under the cup
+rear += cyl(cone_h + 0.01, 6.5, r_out, z=cup_bot - cone_h)
+rear += cyl(cup_bot - cone_h + 0.02, 5.0, 6.5)                                  # leg (tapers up)
 rear += cyl(1.6, FOOT_D / 2)                                                    # foot pad
 
 # ---- front leg extension: sleeve on a post --------------------------------------------------------
 sw, st = TIP_W + 2 * CLEAR, TIP_T + 2 * CLEAR
 front = box(-sw / 2 - WALL, sw / 2 + WALL, -st / 2 - WALL, st / 2 + WALL, LIFT - 1.5, LIFT + SOCK_D)
 front -= box(-sw / 2, sw / 2, -st / 2, st / 2, LIFT, LIFT + SOCK_D + 1)          # socket for the leg tip
-front += cyl(LIFT - 1.49, 4.5, 5.5)                                              # post
+sock_r = ((sw / 2 + WALL) ** 2 + (st / 2 + WALL) ** 2) ** 0.5
+front += cyl(sock_r - 5.5 + 0.01, 5.5, sock_r, z=LIFT - 1.5 - (sock_r - 5.5))   # cone under the socket
+front += cyl(LIFT - 1.5 - (sock_r - 5.5) + 0.02, 4.5, 5.5)                      # post
 front += cyl(1.6, FOOT_D / 2)                                                    # foot pad
 
 here = os.path.dirname(os.path.abspath(__file__))
