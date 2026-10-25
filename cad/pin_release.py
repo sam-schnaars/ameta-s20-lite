@@ -22,17 +22,19 @@ import trimesh
 from manifold3d import Manifold
 
 # ---- servo (GH-S37D 3.7 g -- typical values, MEASURE yours) -------------------------------------
-SERVO_L = 20.0        # body length (long side, along the pin)
+SERVO_L = 20.0        # body length without mounting tabs (measured 20 mm)
 SERVO_W = 8.5         # body width
-SERVO_H = 17.5        # body height from bottom to the top face the horn sits on (not counting the shaft)
+SERVO_H = 25.0        # base to the top of the output gear where the arm sits (measured 25 mm)
+TAB_SPAN = 30.0       # length across the mounting tabs (measured 30 mm)
+END_LIP = 3.0         # cradle end walls are only this tall, so the tabs clear them
 SHAFT_OFFSET = 5.0    # output shaft centre, measured from the body's END nearest the fins
-HORN_R = 8.0          # horn reach: shaft centre to the outermost hole you'll use
+HORN_R = 10.0         # half the arm length (arm measured 20 mm across)
 
 # ---- pin and payload ---------------------------------------------------------------------------
 PIN_D = 2.0           # pin diameter (paper clip ~1.0, steel rod 2.0, bamboo skewer ~2.5)
 PIN_CLEAR = 0.35      # hole is PIN_D + this (sliding fit)
 LOOP_GAP = 7.0        # space between the fins where the payload loop hangs
-PIN_Z = SERVO_H + 1.5 # pin height above the plate (≈ horn height so the wire link is straight)
+PIN_Z = SERVO_H + 0.5 # pin height above the plate (≈ arm height so the wire link is straight)
 
 # ---- printing ----------------------------------------------------------------------------------
 CLEAR = 0.3           # servo pocket clearance per side
@@ -64,7 +66,7 @@ def x_hole(x0, x1, y, z, d):
 in_l, in_w = SERVO_L + 2 * CLEAR, SERVO_W + 2 * CLEAR
 cr_x0, cr_x1 = 0.0, in_l + 2 * WALL
 shaft_x = cr_x1 - WALL - CLEAR - SHAFT_OFFSET
-fin1_x0 = max(cr_x1 + 1.0, shaft_x + HORN_R + 1.5)          # horn must clear fin1 when it swings
+fin1_x0 = max(cr_x1 + 1.0, shaft_x + HORN_R + 1.5, cr_x0 + WALL + CLEAR + SERVO_L / 2 + TAB_SPAN / 2 + 1.0)  # clear horn swing + tab
 fin1_x1 = fin1_x0 + FIN_T
 fin2_x0 = fin1_x1 + LOOP_GAP
 fin2_x1 = fin2_x0 + FIN_T
@@ -77,6 +79,8 @@ for sx in (px0 + 2.0, px1 - 2.0 - SLOT[0]):                  # strap slots at bo
 
 cradle = box(cr_x0, cr_x1, -in_w / 2 - WALL, in_w / 2 + WALL, 0, PLATE_T + CRADLE_H)
 cradle -= box(cr_x0 + WALL, cr_x1 - WALL, -in_w / 2, in_w / 2, PLATE_T, PLATE_T + CRADLE_H + 1)
+for ex0, ex1 in ((cr_x0 - 1, cr_x0 + WALL + 0.01), (cr_x1 - WALL - 0.01, cr_x1 + 1)):   # low end walls: tabs pass over
+    cradle -= box(ex0, ex1, -in_w / 2 - WALL - 1, in_w / 2 + WALL + 1, PLATE_T + END_LIP, PLATE_T + CRADLE_H + 1)
 cradle -= box(cr_x0 - 1, cr_x0 + WALL + 1, -2.0, 2.0, PLATE_T, PLATE_T + 4.0)   # wire exit notch (far end)
 
 pin_z = PLATE_T + PIN_Z
