@@ -31,8 +31,10 @@ SHAFT_OFFSET = 5.0    # output shaft centre, measured from the body's END neares
 HORN_R = 10.0         # half the arm length (arm measured 20 mm across)
 
 # ---- pin and payload ---------------------------------------------------------------------------
-PIN_D = 2.0           # pin diameter (paper clip ~1.0, steel rod 2.0, bamboo skewer ~2.5)
-PIN_CLEAR = 0.35      # hole is PIN_D + this (sliding fit)
+PIN_D = 1.0           # pin diameter (paper clip ~1.0, steel rod 2.0, bamboo skewer ~2.5)
+NEAR_CLEAR = 0.6      # near fin (servo side): snug guide hole = PIN_D + this (printed holes come out small)
+FAR_CLEAR = 1.2       # far fin: looser hole = PIN_D + this, plus a funnel on the gap side so the tip finds it
+FUNNEL_D = 4.5        # funnel mouth diameter on the far fin
 LOOP_GAP = 7.0        # space between the fins where the payload loop hangs
 PIN_Z = SERVO_H + 0.5 # pin height above the plate (≈ arm height so the wire link is straight)
 
@@ -41,9 +43,11 @@ CLEAR = 0.3           # servo pocket clearance per side
 WALL = 1.2            # cradle wall
 PLATE_T = 2.0         # plate thickness
 CRADLE_H = 8.0        # cradle wall height (holds the servo's lower half; glue it in)
-FIN_T = 2.6           # fin thickness (along the pin)
-FIN_W = 9.0           # fin width
-SLOT = (2.6, 9.0)     # strap slot size (x, y) -- zip tie / rubber band
+FIN_T = 3.6           # fin thickness (along the pin)  -- v2: thicker, the v1 fins snapped
+FIN_W = 10.0          # fin width
+RIB_H = 12.0          # v2: solid rib joining both fins near the plate (stays clear of the loop around the pin)
+VELCRO = True         # v2: plain flat plate for velcro (no strap slots / end flanges)
+SLOT = (2.6, 9.0)     # strap slot size (x, y) -- only used when VELCRO = False
 SEG = 48              # circle smoothness
 
 _ap = argparse.ArgumentParser()
@@ -71,11 +75,15 @@ fin1_x1 = fin1_x0 + FIN_T
 fin2_x0 = fin1_x1 + LOOP_GAP
 fin2_x1 = fin2_x0 + FIN_T
 half_w = max(in_w / 2 + WALL, FIN_W / 2) + 3.0
-px0, px1 = cr_x0 - SLOT[0] - 4.0, fin2_x1 + SLOT[0] + 4.0
+if VELCRO:
+    px0, px1 = cr_x0 - 1.0, fin2_x1 + 1.0
+else:
+    px0, px1 = cr_x0 - SLOT[0] - 4.0, fin2_x1 + SLOT[0] + 4.0
 
 plate = box(px0, px1, -half_w, half_w, 0, PLATE_T)
-for sx in (px0 + 2.0, px1 - 2.0 - SLOT[0]):                  # strap slots at both ends
-    plate -= box(sx, sx + SLOT[0], -SLOT[1] / 2, SLOT[1] / 2, -1, PLATE_T + 1)
+if not VELCRO:
+    for sx in (px0 + 2.0, px1 - 2.0 - SLOT[0]):              # strap slots at both ends
+        plate -= box(sx, sx + SLOT[0], -SLOT[1] / 2, SLOT[1] / 2, -1, PLATE_T + 1)
 
 cradle = box(cr_x0, cr_x1, -in_w / 2 - WALL, in_w / 2 + WALL, 0, PLATE_T + CRADLE_H)
 cradle -= box(cr_x0 + WALL, cr_x1 - WALL, -in_w / 2, in_w / 2, PLATE_T, PLATE_T + CRADLE_H + 1)
@@ -90,17 +98,21 @@ for fx0, fx1 in ((fin1_x0, fin1_x1), (fin2_x0, fin2_x1)):
     fin = box(fx0, fx1, -FIN_W / 2, FIN_W / 2, 0, fin_top)
     # gussets (outer side of each fin) so the fin doesn't snap off the plate
     for side in (-1, 1):
-        g = Manifold.cube([FIN_T, 2.0, fin_top * 0.6]).translate([fx0, side * (FIN_W / 2) - (0 if side > 0 else 2.0), 0])
+        g = Manifold.cube([FIN_T, 3.0, fin_top * 0.8]).translate([fx0, side * (FIN_W / 2) - (0 if side > 0 else 3.0), 0])
         fin += g
     fins += fin
-fins -= x_hole(fin1_x0 - 1, fin2_x1 + 1, 0, pin_z, PIN_D + PIN_CLEAR)
+fins += box(fin1_x0, fin2_x1, -FIN_W / 2, FIN_W / 2, 0, PLATE_T + RIB_H)       # v2 rib: ties the fins together
+fins -= x_hole(fin1_x0 - 1, fin1_x1 + 0.01, 0, pin_z, PIN_D + NEAR_CLEAR)     # near fin: snug
+fins -= x_hole(fin2_x0 - 0.01, fin2_x1 + 1, 0, pin_z, PIN_D + FAR_CLEAR)      # far fin: looser
+funnel = Manifold.cylinder(1.6, FUNNEL_D / 2, (PIN_D + FAR_CLEAR) / 2, SEG).rotate([0, 90, 0])
+fins -= funnel.translate([fin2_x0 - 0.01, 0, pin_z])                           # funnel on the gap side
 
 part = plate + cradle + fins
 
 mesh = part.to_mesh()
 tm = trimesh.Trimesh(vertices=np.asarray(mesh.vert_properties)[:, :3], faces=np.asarray(mesh.tri_verts))
 here = os.path.dirname(os.path.abspath(__file__))
-out = os.path.join(here, "pin_release.stl" if not _a.pin_d else f"pin_release_pin{PIN_D:g}.stl")
+out = os.path.join(here, "pin_release_v2.stl" if not _a.pin_d else f"pin_release_v2_pin{PIN_D:g}.stl")
 tm.export(out)
 
 vol_cm3 = tm.volume / 1000
