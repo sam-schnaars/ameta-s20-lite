@@ -1,6 +1,6 @@
-"""First drop flight: takeoff (~1.2 m) -> climb 2 s -> hover -> RELEASE -> hover -> land.
+"""First drop flight: takeoff (~1.2 m) -> climb 0.5 s -> hover -> RELEASE -> hover -> land.
 
-    cd ~/Gabriel/ameta_s20 && .venv/bin/python examples/drop_test.py            # climb 2 s
+    cd ~/Gabriel/ameta_s20 && .venv/bin/python examples/drop_test.py            # climb 0.5 s
     .venv/bin/python examples/drop_test.py --up 1.0                            # gentler climb
 
 Needs: harness ON and mounted (latch closed), ground XIAO on the Mac's USB, Mac on the drone's Wi-Fi,
@@ -13,7 +13,7 @@ from drone import S20Lite
 from harness import prepare_for_flight, safe_release
 
 ap = argparse.ArgumentParser()
-ap.add_argument("--up", type=float, default=2.0, help="seconds of climb at --speed after takeoff (max 3)")
+ap.add_argument("--up", type=float, default=0.5, help="seconds of climb at --speed after takeoff (max 3)")
 ap.add_argument("--speed", type=float, default=0.2, help="throttle stick for the climb (max 0.3)")
 args = ap.parse_args()
 up = max(0.0, min(args.up, 3.0))
