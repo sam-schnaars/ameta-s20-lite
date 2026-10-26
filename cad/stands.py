@@ -65,15 +65,7 @@ rear -= cyl(pocket + 1, r_in, z=seat_z)                                         
 rear -= box(0, r_out + 1, -(ARM_W / 2 + CLEAR), ARM_W / 2 + CLEAR, seat_z, seat_z + pocket + 1)  # arm exits +x
 rear -= box(-(BUMP_L / 2 + 0.6), BUMP_L / 2 + 0.6, -(BUMP_W / 2 + 0.6), BUMP_W / 2 + 0.6,
             seat_z - BUMP_H - 0.5, seat_z + 0.1)                                # bump recess
-for s in (-1, 1):                                                               # strap ears (velcro / zip tie)
-    top = box(-4, 4, min(s * (r_out - 1), s * (r_out + 5)), max(s * (r_out - 1), s * (r_out + 5)), seat_z - 2, seat_z + 1)
-    zl = cup_bot - 6.0                            # anchor point ON the cone under the cup (no floating start)
-    rl = r_out - (cup_bot - zl) - 1.0
-    low = box(-3, 3, min(s * (rl - 0.5), s * rl), max(s * (rl - 0.5), s * rl), zl, zl + 0.1)
-    ear = (top + low).hull()                      # 45-ish brace under the ear: prints without supports
-    slot = box(-3, 3, min(s * (r_out + 1), s * (r_out + 3.5)), max(s * (r_out + 1), s * (r_out + 3.5)),
-               seat_z - 3, seat_z + 2)
-    rear = rear + ear - slot
+# v2: no strap ears -- hold the cup on with velcro / double-sided tape (ears printed as floating islands)
 cone_h = r_out - 6.5                                                            # 45 deg cone under the cup
 rear += cyl(cone_h + 0.01, 6.5, r_out, z=cup_bot - cone_h)
 rear += cyl(cup_bot - cone_h + 0.02, 5.0, 6.5)                                  # leg (tapers up)
